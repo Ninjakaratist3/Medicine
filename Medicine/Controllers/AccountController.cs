@@ -50,8 +50,13 @@ namespace Medicine.Controllers
                 return BadRequest();
             }
 
-            user = new User();
-            ConvertRegisterFormToUser(model, user);
+            user = model.ConvertToUser();
+
+            UserRole userRole = _userRoleRepository.Query().FirstOrDefault(r => r.Name == "user");
+            if (userRole != null)
+            {
+                user.Role = userRole;
+            }
 
             _userRepository.Add(user);
             await _userRepository.SaveChangesAsync();
@@ -61,23 +66,6 @@ namespace Medicine.Controllers
             await Authenticate(user);
 
             return Ok();
-        }
-
-        private User ConvertRegisterFormToUser(RegisterForm registerForm, User user)
-        {
-            var passwordHasher = new PasswordHasher<User>();
-
-            user.Email = registerForm.Email;
-            user.Name = registerForm.Name;
-            user.Password = passwordHasher.HashPassword(user, registerForm.Password);
-
-            UserRole userRole = _userRoleRepository.Query().FirstOrDefault(r => r.Name == "user");
-            if (userRole != null)
-            {
-                user.Role = userRole;
-            }
-
-            return user;
         }
 
         private async void SendRegistrationEmailMessage(User user)

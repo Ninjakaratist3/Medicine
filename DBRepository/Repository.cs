@@ -10,9 +10,8 @@ namespace DBRepository
 {
     public class Repository<T> : IRepository<T> where T : class, IEntityBase<long>
     {
-        private RepositoryContext _context;
-
-        private DbSet<T> _dbSet;
+        private readonly RepositoryContext _context;
+        private readonly DbSet<T> _dbSet;
 
         public Repository(RepositoryContext context)
         {

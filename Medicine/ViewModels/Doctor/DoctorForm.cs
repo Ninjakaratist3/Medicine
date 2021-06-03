@@ -1,13 +1,14 @@
-﻿using Models.Entities.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Models.Entities
+namespace Medicine.ViewModels.Doctor
 {
-    public class Doctor : EntityBase
+    public class DoctorForm
     {
+        [Required]
         public string Name { get; set; }
 
         public string Specialization { get; set; }
@@ -18,6 +19,6 @@ namespace Models.Entities
 
         public string Location { get; set; }
 
-        public Clinic Clinic { get; set; }
+        public long ClinicId { get; set; }
     }
 }

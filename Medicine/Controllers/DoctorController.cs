@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DBRepository;
+using Medicine.Services;
+using Medicine.ViewModels.Doctor;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
@@ -13,84 +15,67 @@ namespace Medicine.Controllers
     [ApiController]
     public class DoctorController : ControllerBase
     {
-        private IRepository<Doctor> _doctorRepository;
+        private readonly IDoctorService _doctorService;
 
-        public DoctorController(IRepository<Doctor> doctorRepository)
+        public DoctorController(IDoctorService doctorService)
         {
-            _doctorRepository = doctorRepository;
+            _doctorService = doctorService;
         }
 
         [HttpGet]
-        public IEnumerable<Doctor> GetAllDoctors()
+        public IActionResult Get()
         {
-            return _doctorRepository.Query().ToList();
-        }
+            var doctors = _doctorService.GetAll();
 
-        [HttpGet("by-clinic/{clinicId}")]
-        public IEnumerable<Doctor> GetDoctorsByClinic(int clinicId)
-        {
-            return _doctorRepository.Query().Where(d => d.Id == clinicId).ToList();
+            return Ok(doctors);
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var doctor = _doctorRepository.GetById(id);
-
-            if (doctor == null)
-            {
-                return NotFound();
-            }
+            var doctor = _doctorService.Get(id);
 
             return Ok(doctor);
         }
 
-        [HttpPost]
-        public IActionResult Create(Doctor doctor)
+        [HttpGet("by-clinic/{clinicId}")]
+        public IActionResult GetByClinicId(int clinicId)
         {
-            if (doctor == null)
+            var doctorsByClinic = _doctorService.GetByClinicId(clinicId);
+
+            return Ok(doctorsByClinic);
+        }
+
+        [HttpPost]
+        public IActionResult Create(DoctorForm model)
+        {
+            if (!ModelState.IsValid)
             {
                 return NotFound();
             }
 
-            _doctorRepository.Add(doctor);
-            _doctorRepository.SaveChanges();
+            _doctorService.Create(model);
 
             return Ok();
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Doctor newDoctor)
+        public IActionResult Update(long id, DoctorForm model)
         {
-            var doctor = _doctorRepository.GetById(id);
-
-            if (doctor == null || newDoctor == null)
+            if (!ModelState.IsValid)
             {
                 return NotFound();
             }
 
-            doctor.Name = newDoctor.Name;
-            doctor.Location = newDoctor.Location;
-            doctor.Price = newDoctor.Price;
-            doctor.Rating = newDoctor.Rating;
-            doctor.Specialization = newDoctor.Specialization;
+            _doctorService.Update(id, model);
 
-            _doctorRepository.SaveChanges();
             return Ok();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var doctor = _doctorRepository.GetById(id);
-
-            if (doctor == null)
-            {
-                return NotFound();
-            }
-
-            _doctorRepository.Remove(doctor);
-            _doctorRepository.SaveChanges();
+            _doctorService.Delete(id);
 
             return Ok();
         }

@@ -1,8 +1,11 @@
-﻿using Models.Entities.Base;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Models.Entities
+namespace Medicine.ViewModels.Clinic
 {
-    public class Clinic : EntityBase
+    public class ClinicViewModel
     {
         public string Name { get; set; }
 

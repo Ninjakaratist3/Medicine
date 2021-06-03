@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DBRepository;
+using Medicine.ViewModels.Clinic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
@@ -13,8 +14,8 @@ namespace Medicine.Controllers
     [ApiController]
     public class ClinicController : ControllerBase
     {
-        private IRepository<Clinic> _clinicRepository;
-        private IRepository<Doctor> _doctorRepository;
+        private readonly IRepository<Clinic> _clinicRepository;
+        private readonly IRepository<Doctor> _doctorRepository;
 
         public ClinicController(IRepository<Clinic> clinicRepository, IRepository<Doctor> doctorRepository)
         {
@@ -25,7 +26,16 @@ namespace Medicine.Controllers
         [HttpGet]
         public IActionResult GetAllClinics()
         {
-            return Ok(_clinicRepository.Query().ToList());
+            var clinics = _clinicRepository.Query()
+                .Select(c => new ClinicViewModel() { 
+                    Name = c.Name,
+                    Address = c.Address,
+                    OpeningHours = c.OpeningHours,
+                    SpecialistsCount = c.SpecialistsCount
+                })
+                .ToList();
+
+            return Ok(clinics);
         }
 
         [HttpGet("{id}")]
@@ -42,12 +52,20 @@ namespace Medicine.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Clinic clinic)
+        public IActionResult Create(ClinicForm model)
         {
-            if (clinic == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest();
             }
+
+            var clinic = new Clinic()
+            {
+                Name = model.Name,
+                Address = model.Address,
+                OpeningHours = model.OpeningHours,
+                SpecialistsCount = model.SpecialistsCount
+            };
 
             _clinicRepository.Add(clinic);
             _clinicRepository.SaveChanges();
@@ -56,18 +74,18 @@ namespace Medicine.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, Clinic newClinic)
+        public IActionResult Update(long id, ClinicForm model)
         {
             var clinic = _clinicRepository.GetById(id);
 
-            if (clinic == null || newClinic == null)
+            if (clinic == null || model == null)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            clinic.Name = newClinic.Name;
-            clinic.OpeningHours = newClinic.OpeningHours;
-            clinic.SpecialistsNumber = newClinic.SpecialistsNumber;
+            clinic.Name = model.Name;
+            clinic.OpeningHours = model.OpeningHours;
+            clinic.SpecialistsCount = model.SpecialistsCount;
 
             _clinicRepository.SaveChanges();
             return Ok();

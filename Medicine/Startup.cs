@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using EmailSender;
 using EmailSender.Services;
+using Medicine.Services;
 
 namespace Medicine
 {
@@ -47,6 +48,7 @@ namespace Medicine
 
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<ISmtpConfigurationService, SmtpConfigurationService>();
+            services.AddTransient<IDoctorService, DoctorService>();
             services.AddTransient<IEmailSender, EmailSender.EmailSender>();
         }
 

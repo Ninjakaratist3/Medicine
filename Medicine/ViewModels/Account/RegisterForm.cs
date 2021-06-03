@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Medicine.ViewModels.Account
 {
@@ -22,5 +19,17 @@ namespace Medicine.ViewModels.Account
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Пароль введен неверно")]
         public string ConfirmPassword { get; set; }
+
+        public Models.Entities.User ConvertToUser()
+        {
+            var passwordHasher = new PasswordHasher<Models.Entities.User>();
+
+            var user = new Models.Entities.User();
+            user.Email = this.Email;
+            user.Name = this.Name;
+            user.Password = passwordHasher.HashPassword(user, this.Password);
+
+            return user;
+        }
     }
 }
